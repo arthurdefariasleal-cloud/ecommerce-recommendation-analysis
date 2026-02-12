@@ -183,7 +183,7 @@ Os valores de pico indicam que o usuário está mais propenso a aceitar recomend
 ### TOP 5 Produtos por Departamento
 <img width="492" height="363" alt="image" src="https://github.com/user-attachments/assets/039f103b-3d8f-45ab-ac06-55b67c015ce1" />
 
-**Obs.:** a tabela completa com os resultados está disponível em [dashboard](./reports/dashboard)
+**Obs.:** a tabela completa com os resultados está disponível em [dashboard.pibix](./reports/dashboard.pbix)
 
 Padrões observados:
 * Beverages: predominância de águas e bebidas leves;
