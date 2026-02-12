@@ -53,36 +53,149 @@ Antes de iniciar as análises, foi realizado um Sanity Check com SQL para valida
 # Análise Exploratória (EDA)
 A EDA teve como objetivo entender o comportamento de compra dos usuários a partir de três relações fato-dimensão.
 
-### Distribuição de Vendas por Departamento
+### - Distribuição de Vendas por Departamento
 Analisa quais departamentos concentram maior volume de produtos vendidos, ajudando a entender onde está a maior demanda.
 
 🔗 Código SQL:  [02_eda.sql](./sql/02_eda.sql)  
 ➡️ Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
 
-### Distribuição de Vendas por Dia da Semana
+### - Distribuição de Vendas por Dia da Semana
 Avaliar como o volume de compras se comporta ao longo da semana, identificando possíveis picos de demanda.
 
 🔗 Código SQL:  [02_eda.sql](./sql/02_eda.sql)  
 ➡️ Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
 
-### Distribuição por Hora do Dia
+### - Distribuição por Hora do Dia
 Mostra em quais horários as compras se concentram
 
 🔗 Código SQL:  [02_eda.sql](./sql/02_eda.sql)  
 ➡️ Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
 
-### TOP 5 Produtos Mais Vendidos por Departamento
+### - TOP 5 Produtos Mais Vendidos por Departamento
 Ranking dos produtos líderes em cada departamento, incluindo frequência relativa e acumulada.
 
 🔗 Código SQL:  [02_eda.sql](./sql/02_eda.sql)  
 ➡️ Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
 
-### Concentração de Tipos de Produtos por Hora do Dia
+### - Concentração de Tipos de Produtos por Hora do Dia
 Analisa quais tipos de produtos (ailes) dominam as vendas em cada hora do dia.
 
 🔗 Código SQL:  [02_eda.sql](./sql/02_eda.sql)  
 ➡️ Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
 
+# Modelagem
+Como a base de dados possui um volume elevado, a análise de co-ocorrência completa resultaria em um alto número de combinações com baixa relevância. Por isso, optei por focar em recomendações mais úteis, avaliando compras conjuntas apenas para produtos relevantes, definidos pelo número de clientes distintos que compram cada item. A modelagem foi implementada com SQL(PostegreSQL) e os scripts estão organizados na paste /sql.
+
+## Objetivo da Modelagem
+* Calcular co-ocorrências entre pares de produtos dentro do mesmo pedido;
+* Quantificar a força de associação entre produtos;
+* Gerar uma base que, para cada produto, retorne os itens mais frequentemente comprados em conjunto, com métricas que possibilitem ranqueamento e filtragem.
+
+## Etapas da Modelagem
+
+### 1) Definição de Produto Relevante
+Aqui o primeiro o passo foi medir a popularidade de cada produto. Para isso, calculei quantos clientes distintos compraram cada um deles. 
+
+Em seguida, analisei a distribuição desses valores para diferentes pontos de corte (50, 100, 200, 500) e escolho o critério que melhor equilibra abragência e representatividade.
+
+No projeto, defini como produto relevante aquele comprado por pelo menos 500 clientes (ponto de corte) distintos, mantendo uma cobertura de ~ 95% dos clientes.
+
+🔗 Código SQL:  [02_modelo.sql](./sql/03_modelo.sql)  
+➡️ Resultados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
+
+### 2) Base Analítica para Recomendação
+Definido produto relevante, construí uma base intermediária relacionando clientes x produtos relevantes. Essa tabela é a base para o cálculo de co-ocorrências.
+
+🔗 Código SQL:  [02_modelo.sql](./sql/03_modelo.sql)  
+➡️ Resultados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
+
+### 3) Análise de Co-ocorrência
+A co-ocorrência foi calculada considerando apenas pares de produtos comprados pelo mesmo usuário, aplicando um limite mínimo de ocorrências (no meu caso, 50 ocorrências) para evitar associações fracas.
+
+🔗 Código SQL:  [02_modelo.sql](./sql/03_modelo.sql)  
+➡️ Resultados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
+
+### 4) Probabilidade de Compra
+A partir dos pares com co-ocorrência, calculei a probabilidade condicional de compra. Para isso, transformei os pares em relações direcionais (A -> B e B -> A) e calculei: 
+
+**probabilidade_compra = (clientes_ab) / clientes_base**
+
+🔗 Código SQL:  [02_modelo.sql](./sql/03_modelo.sql)  
+➡️ Resultados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
+
+### 5) Ranqueamento das Recomendações
+Por fim, realizei o ranqueamento destas recomendações para manter a base final objetiva e fácil de utilizar.
+
+**Critérios de ordenação:**
+1. Maior probabilidade de compra condicional
+2. Maior número de clientes em comum (clientes_ab) como critério de desempate
+
+Depois, selecionei apenas o TOP 3 recomendações por produto, gerando a base final que soluciona o modelo.
+
+🔗 Código SQL:  [02_modelo.sql](./sql/03_modelo.sql)  
+➡️ Resultados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
 
 # Avaliação dos Resultados
+Aqui o objetivo é gerar insights a partir dos padrões de consumo e verificar se as associações identificadas possuem valor prático para estratégias de recomendações.
+
+### Distribuição de Vendas por Departamento
+<img width="344" height="446" alt="image" src="https://github.com/user-attachments/assets/343309cc-f8f2-4296-aa57-8adbf535ae09" />
+
+A análise mostrou forte concentração de vendas em poucos departamentos, com destaque para:
+* Snacks (~866 mil)
+* Beverages (~809 mil)
+* Frozen (~670 mil)
+* Pantry (~562 mil)
+  
+Departamentos como Bakery, Canned Goods e Dry Good Pasta apresentam volume relevante, porém menor. Já departamentos como Pets, Missing, Other e Bulk têm baixa participação.
+
+**Insight principal:**
+Snack e Beverages são estruturais para o negócio e devem ser priorizados em qualquer estratégia de recomendação. Estes dois departamentos concentram tráfego, recorrência e oportunidades de cross-sell.
+
+### Distribuição de Vendas por Dia da Semana
+<img width="454" height="325" alt="image" src="https://github.com/user-attachments/assets/aafeffc5-d827-42c6-ac9c-8fa6425d0e76" />
+
+Aqui temos um padrão claro de concentração no início e no final da semana:
+* Domingo apresenta o maior volume (~970 mil);
+* Segunda também é elevada (~907 mil);
+* Queda entre terça e quinta;
+* O volume volta a crescer na sexta e no sábado.
+  
+Este comportamento sugere compras de reposição no início da semana e compras de consumo imediato próxima ao fim de semana.
+
+**Insight principal:**
+Estratégias de recomendação devem variar conforme o dia.
+* Domingo/segunda focar em recomendações mais amplas (produtos de despensa/estoque)
+* Sexta/sabádo focar em recomendações de produtos de consumo rápido (snacks e bebidas, por exemplo)
+
+### Distribuião de Vendas por Hora do Dia
+<img width="998" height="266" alt="image" src="https://github.com/user-attachments/assets/c2ee1355-95bf-46d5-b463-734e657bc089" />
+
+Padrão de consumo bem definido:
+* Baixo volume na madrugada (0h-5h);
+* Crescimento a partir das 6h;
+* Pico entre 10h-15h (horário comercial);
+* Queda gradual após 16h.
+
+**Insight principal:**
+Os valores de pico indicam que o usuário está mais propenso a aceitar recomendações em horário comercial (10h-15h).
+
+### TOP 5 Produtos por Departamento
+<img width="492" height="363" alt="image" src="https://github.com/user-attachments/assets/039f103b-3d8f-45ab-ac06-55b67c015ce1" />
+
+**Obs.:** a tabela completa com os resultados está disponível em [dashboard](./reports/dashboard)
+
+Padrões observados:
+* Beverages: predominância de águas e bebidas leves;
+* Deli: forte concentração em poucos itens (ex.: hummus);
+* Frozen: liderança de frutas e vegetais congelados;
+* Meat & Seafood: proteínas magras dominam;
+* Canned Goods: itens base de preparo (grãos, tomates)
+
+
+
+
+
+
+
 
