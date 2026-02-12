@@ -90,23 +90,4 @@ Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliaç�
 
 
 # Avaliação dos Resultados
-lklkjlkjllk
-k
-k
-kk
-k
-k
-k
-k
 
-k
-k
-k
-k
-k
-k
-k
-k
-k
-k
-k
