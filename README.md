@@ -39,8 +39,8 @@ Este projeto utiliza quatro tabelas relacionais:
 Antes de iniciar as análises, foi realizado um Sanity Check com SQL para validar a consistência, integridade e qualidade das bases.
 
 **Considerações Importantes:**
-1. As tabelas foram avaliadas quanto a volume, unicidade, nulos, chaves de referência, intervalos de valores e outiliers.
-2. Duplicidades em compras podem representar comportamento esperado (ex.: usuário comprar mais de um produto no mesmo dia/horário).
+* As tabelas foram avaliadas quanto a volume, unicidade, nulos, chaves de referência, intervalos de valores e outiliers.
+* Duplicidades em compras podem representar comportamento esperado (ex.: usuário comprar mais de um produto no mesmo dia/horário).
 
 **Etapas da Preparação no Pipeline:**
 1. Checagem do volume de dados nas quatro tabelas (fato e dimensões).
@@ -53,38 +53,29 @@ Antes de iniciar as análises, foi realizado um Sanity Check com SQL para valida
 # Análise Exploratória (EDA)
 A EDA teve como objetivo entender o comportamento de compra dos usuários a partir de três relações fato-dimensão.
 
-### - Distribuição de Vendas por Departamento
+🔗 Script SQL da EDA:  [02_eda.sql](./sql/02_eda.sql)  
+➡️ Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
+
+### Distribuição de Vendas por Departamento
 Analisa quais departamentos concentram maior volume de produtos vendidos, ajudando a entender onde está a maior demanda.
 
-🔗 Código SQL:  [02_eda.sql](./sql/02_eda.sql)  
-➡️ Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
-
-### - Distribuição de Vendas por Dia da Semana
+### Distribuição de Vendas por Dia da Semana
 Avaliar como o volume de compras se comporta ao longo da semana, identificando possíveis picos de demanda.
 
-🔗 Código SQL:  [02_eda.sql](./sql/02_eda.sql)  
-➡️ Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
-
-### - Distribuição por Hora do Dia
+### Distribuição por Hora do Dia
 Mostra em quais horários as compras se concentram
 
-🔗 Código SQL:  [02_eda.sql](./sql/02_eda.sql)  
-➡️ Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
-
-### - TOP 5 Produtos Mais Vendidos por Departamento
+### TOP 5 Produtos Mais Vendidos por Departamento
 Ranking dos produtos líderes em cada departamento, incluindo frequência relativa e acumulada.
 
-🔗 Código SQL:  [02_eda.sql](./sql/02_eda.sql)  
-➡️ Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
-
-### - Concentração de Tipos de Produtos por Hora do Dia
+### Concentração de Tipos de Produtos por Hora do Dia
 Analisa quais tipos de produtos (ailes) dominam as vendas em cada hora do dia.
-
-🔗 Código SQL:  [02_eda.sql](./sql/02_eda.sql)  
-➡️ Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
 
 # Modelagem
 Como a base de dados possui um volume elevado, a análise de co-ocorrência completa resultaria em um alto número de combinações com baixa relevância. Por isso, optei por focar em recomendações mais úteis, avaliando compras conjuntas apenas para produtos relevantes, definidos pelo número de clientes distintos que compram cada item. A modelagem foi implementada com SQL(PostegreSQL) e os scripts estão organizados na paste /sql.
+
+🔗 Script SQL do modelo:  [02_modelo.sql](./sql/03_modelo.sql)  
+➡️ Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
 
 ## Objetivo da Modelagem
 * Calcular co-ocorrências entre pares de produtos dentro do mesmo pedido;
@@ -100,28 +91,16 @@ Em seguida, analisei a distribuição desses valores para diferentes pontos de c
 
 No projeto, defini como produto relevante aquele comprado por pelo menos 500 clientes (ponto de corte) distintos, mantendo uma cobertura de ~ 95% dos clientes.
 
-🔗 Código SQL:  [02_modelo.sql](./sql/03_modelo.sql)  
-➡️ Resultados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
-
 ### 2) Base Analítica para Recomendação
 Definido produto relevante, construí uma base intermediária relacionando clientes x produtos relevantes. Essa tabela é a base para o cálculo de co-ocorrências.
 
-🔗 Código SQL:  [02_modelo.sql](./sql/03_modelo.sql)  
-➡️ Resultados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
-
 ### 3) Análise de Co-ocorrência
 A co-ocorrência foi calculada considerando apenas pares de produtos comprados pelo mesmo usuário, aplicando um limite mínimo de ocorrências (no meu caso, 50 ocorrências) para evitar associações fracas.
-
-🔗 Código SQL:  [02_modelo.sql](./sql/03_modelo.sql)  
-➡️ Resultados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
 
 ### 4) Probabilidade de Compra
 A partir dos pares com co-ocorrência, calculei a probabilidade condicional de compra. Para isso, transformei os pares em relações direcionais (A -> B e B -> A) e calculei: 
 
 **probabilidade_compra = (clientes_ab) / clientes_base**
-
-🔗 Código SQL:  [02_modelo.sql](./sql/03_modelo.sql)  
-➡️ Resultados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
 
 ### 5) Ranqueamento das Recomendações
 Por fim, realizei o ranqueamento destas recomendações para manter a base final objetiva e fácil de utilizar.
@@ -131,9 +110,6 @@ Por fim, realizei o ranqueamento destas recomendações para manter a base final
 2. Maior número de clientes em comum (clientes_ab) como critério de desempate
 
 Depois, selecionei apenas o TOP 3 recomendações por produto, gerando a base final que soluciona o modelo.
-
-🔗 Código SQL:  [02_modelo.sql](./sql/03_modelo.sql)  
-➡️ Resultados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
 
 # Avaliação dos Resultados
 Aqui o objetivo é gerar insights a partir dos padrões de consumo e verificar se as associações identificadas possuem valor prático para estratégias de recomendações.
@@ -168,7 +144,7 @@ Estratégias de recomendação devem variar conforme o dia.
 * Domingo/segunda focar em recomendações mais amplas (produtos de despensa/estoque)
 * Sexta/sabádo focar em recomendações de produtos de consumo rápido (snacks e bebidas, por exemplo)
 
-### Distribuião de Vendas por Hora do Dia
+### Distribuição de Vendas por Hora do Dia
 <img width="998" height="266" alt="image" src="https://github.com/user-attachments/assets/c2ee1355-95bf-46d5-b463-734e657bc089" />
 
 Padrão de consumo bem definido:
@@ -180,10 +156,10 @@ Padrão de consumo bem definido:
 **Insight principal:**
 Os valores de pico indicam que o usuário está mais propenso a aceitar recomendações em horário comercial (10h-15h).
 
+**Obs.:** a versão completa das tabelas abaixo está em /reports/dashboard
+
 ### TOP 5 Produtos por Departamento
 <img width="492" height="363" alt="image" src="https://github.com/user-attachments/assets/039f103b-3d8f-45ab-ac06-55b67c015ce1" />
-
-**Obs.:** a tabela completa com os resultados está disponível em [dashboard.pbix](./reports/dashboard.pbix)
 
 Padrões observados:
 * Beverages: predominância de águas e bebidas leves;
@@ -192,10 +168,48 @@ Padrões observados:
 * Meat & Seafood: proteínas magras dominam;
 * Canned Goods: itens base de preparo (grãos, tomates)
 
+**Insight principal:**
+Alguns departamentos são guiados por produtos âncora, enquanto outros apresentam consumo variado. Estratégias devem priorizar produtos líderes no primeiro caso e diversidade no segundo.
 
+### Concentração de Tipos de Produto por Hora do Dia
+<img width="442" height="528" alt="image" src="https://github.com/user-attachments/assets/5a1e343e-aea5-44d2-bd5e-400f07740bc2" />
 
+* Madrugada: baixo volume de vendas, com padrão de consumo de bebidas leves, refrigerantes e chips;
+* Manhã: aumento expressivo de compras no início da manhã, com entrada de produtos do tipo Bread, além de manutenção de bebidas e chips;
+* Meio do dia: período de maior concentração de vendas,com dominância de Water Seltzer Sparkling Water, Chips e Bread, indicando que refeições rápidas de preparo imediato dominam este horário;
+* Tarde: padrão de consumo se mantém semelhante ao do meio do dia, com redução de volume, mas com destaque para snacks e a entrada mais frequente de itens como Ice Cream a partir do fim da tarde;
+* Noite: queda no volume, mas com manutenção da concentração em bebidas, snacks e produtos refrigerados, além da presença de Frozen Produce em horários mais tardes.
 
+**Insight principal:**
+O padrão de consumo se mantém estável ao longo do dia (bebidas e snacks predominam) e o horário influencia diretamente no volume de compras. 
+As recomendações devem priorizar o contexto de horário (sugerir mais em horários de pico) e não tanto o mix de produtos.
 
+### Produtos com Maior Probabilidade de Compra Associada (>40%)
+<img width="804" height="531" alt="image" src="https://github.com/user-attachments/assets/0c5489f4-c8dd-434c-9f22-f92a742ca335" />
 
+Considerei apenas as associações com probabilidade de compra superior a 40%, representando as relações mais fortes do modelo.
+* Zero Calorie Cola → Soda (52%)
+* Tangerine → Sparkling Water Grapefruit (43,4%)
+* Apricot Sparkling Water → Sparkling Water Grapefruit (42,3%)
+* Milk Chocolate Almonds → Soda (42%)
+* Granola Bars Peanut → Soda (41,5%)
+* Granola Bars Peanut → Honey Granola Bars (41,1%)
+* Pub Mix → Soda (41,3%)
+* Pub Mix → Trail Mix (41%)
 
+Estas associações indicam:
+* Exploração de variedade na mesma categoria (bebidas;
+* Complementaridade (snack + bebida)
+* Consumo rápido por ocasião (lanche, lazer, etc).
+
+**Insight principal:** recomendações de maior sucesso estão associadas a variedade, complementaridade e ocasiões de consumo.
+
+# Recomendações de Negócio
+* Para bebidas, principalmente água saborizadas e refrigerantes, recomenda-se a sugestão de alternativas similares de sabores no momento da compra (Tangerine → Sparkling Water Grapefruit).
+* Investir em recomendações cruzadas nas compras de snacks e bebidas (Mil Chocolate Almonds → Soda e Granola Bars → Soda).
+* Recomendações de combos de consumo para produtos com mais de uma associação forte, como Pub Mix, que se relaciona tanto com Soda quanto com Trail Mix.
+* Nas compras de barras de cereais, sugerir uma variação de sabor no momento do checkout, incentivando o aumento de itens dentro da mesma categoria.
+
+# Dashboard (Power BI)
+🔗 Acesse o dashboard completo em: https://app.powerbi.com/view?r=eyJrIjoiMjFkZWM3YWEtYWFiYS00MmViLTk4ZDMtNjlmOGYwZDgzZTAzIiwidCI6IjU5MjE4YTI5LTAwYTgtNGYyMy05Y2ZjLWJkOTNlMmI0OTZlOCJ9
 
