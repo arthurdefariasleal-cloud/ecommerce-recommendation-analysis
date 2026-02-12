@@ -56,38 +56,32 @@ A EDA teve como objetivo entender o comportamento de compra dos usuários a part
 ### Distribuição de Vendas por Departamento
 Analisa quais departamentos concentram maior volume de produtos vendidos, ajudando a entender onde está a maior demanda.
 
-Código SQL:
-
-Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
+🔗 Código SQL:  [02_eda.sql](./sql/02_eda.sql)  
+➡️ Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
 
 ### Distribuição de Vendas por Dia da Semana
 Avaliar como o volume de compras se comporta ao longo da semana, identificando possíveis picos de demanda.
 
-Código SQL:
-[02_eda.sql](./sql/02_eda.sql)
-
-Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
+🔗 Código SQL:  [02_eda.sql](./sql/02_eda.sql)  
+➡️ Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
 
 ### Distribuição por Hora do Dia
 Mostra em quais horários as compras se concentram
 
-Código SQL:
-
-Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
+🔗 Código SQL:  [02_eda.sql](./sql/02_eda.sql)  
+➡️ Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
 
 ### TOP 5 Produtos Mais Vendidos por Departamento
 Ranking dos produtos líderes em cada departamento, incluindo frequência relativa e acumulada.
 
-Código SQL:
-
-Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
+🔗 Código SQL:  [02_eda.sql](./sql/02_eda.sql)  
+➡️ Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
 
 ### Concentração de Tipos de Produtos por Hora do Dia
 Analisa quais tipos de produtos (ailes) dominam as vendas em cada hora do dia.
 
-Código SQL:
-
-Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
+🔗 Código SQL:  [02_eda.sql](./sql/02_eda.sql)  
+➡️ Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
 
 
 # Avaliação dos Resultados
