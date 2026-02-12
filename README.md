@@ -64,6 +64,7 @@ Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliaç�
 Avaliar como o volume de compras se comporta ao longo da semana, identificando possíveis picos de demanda.
 
 Código SQL:
+[02_eda.sql](./sql/02_eda.sql)
 
 Resultados apresentados e discutidos em: [Avaliação dos Resultados](#avaliação-dos-resultados)
 
